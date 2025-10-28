@@ -1,6 +1,7 @@
 import {Header} from "@/components/Header";
 import {HomePage} from "@/section/HomePage";
 import {Tracking} from "@/section/Tracking";
+import {Library} from "@/section/Library";
 
 export default function Home() {
     return (
@@ -11,6 +12,7 @@ export default function Home() {
             <main>
                 <HomePage/>
                 <Tracking/>
+                <Library/>
             </main>
         </div>
     );

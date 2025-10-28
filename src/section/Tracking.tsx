@@ -1,11 +1,12 @@
 "use client";
 
-import { ChangeEvent, JSX, useState } from "react";
+import {ChangeEvent, JSX, useEffect, useState} from "react";
 import axios from "axios";
 
 export function Tracking(): JSX.Element {
     const [file, setFile] = useState<File | null>(null);
     const [resultUrl, setResultUrl] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
 
     function callApi(file: File) {
         const formData = new FormData();
@@ -20,7 +21,7 @@ export function Tracking(): JSX.Element {
         if (!endpoint) throw new Error("File không hợp lệ");
 
         return axios.post(endpoint, formData, {
-            headers: { "Content-Type": "multipart/form-data" },
+            headers: {"Content-Type": "multipart/form-data"},
             responseType: "blob",
         });
     }
@@ -36,76 +37,106 @@ export function Tracking(): JSX.Element {
         }
 
         try {
+            setLoading(true);
             const res = await callApi(file);
-            const blob = new Blob([res.data], { type: res.headers["content-type"] });
+            const blob = new Blob([res.data], {type: res.headers["content-type"]});
             if (resultUrl) URL.revokeObjectURL(resultUrl);
             const newUrl = URL.createObjectURL(blob);
             setResultUrl(newUrl);
         } catch (err) {
             console.error(err);
             alert("Lỗi khi gửi file đến API!");
+        } finally {
+            setLoading(false);
         }
     }
 
     return (
         <section
             id="tracking"
-            className="min-vh-100 d-flex flex-column justify-content-center align-items-center bg-green-50 py-5"
-            style={{ scrollMarginTop: "8vh", paddingTop: "8vh" }}
+            className="min-vh-100 d-flex flex-column align-items-center justify-content-center bg-light py-5"
+            style={{scrollMarginTop: "8vh"}}
         >
-            <div className="bg-light rounded-4 shadow p-4">
+            <div className="container-lg py-4">
                 {/* Header */}
-                <div className="text-center mb-4">
-                    <h2 className="fw-bold text-success">
-                        Tải ảnh hoặc video để nhận dạng và phân loại loài rắn 🐍
+                <div className="text-center mb-5">
+                    <h2 className="fw-bold text-primary mb-3 display-6">
+                        Nhận Diện & Theo Dõi Rắn 🐍
                     </h2>
-                    <p className="text-muted mb-0">
-                        Hỗ trợ định dạng ảnh (JPG/PNG/WebP) và video (MP4/WebM/MOV)
+                    <p className="text-secondary fs-5">
+                        Ứng dụng <b>YOLOv11m</b> giúp phát hiện và phân loại loài rắn trong ảnh hoặc video
+                        với độ chính xác cao và tốc độ xử lý vượt trội.
                     </p>
                 </div>
 
-                {/* Nội dung chính */}
-                <div className="row g-4 align-items-stretch">
-                    {/* Cột upload */}
+                <div className="row g-4">
+                    {/* Upload Column */}
                     <div className="col-12 col-lg-5">
-                        <div className="h-100 p-4 border rounded bg-white d-flex flex-column">
-                            <label className="form-label fw-semibold">Chọn tệp</label>
-                            <input
-                                type="file"
-                                className="form-control mb-3"
-                                accept="image/*,video/*"
-                                onChange={handleFileChange}
-                            />
-                            <button
-                                className="btn btn-success rounded w-100 mt-auto"
-                                onClick={handleUpload}
-                            >
-                                Tracking
-                            </button>
+                        <div className="card shadow border-0 h-100 rounded-4">
+                            <div className="card-body d-flex flex-column p-4">
+                                <div>
+                                    <label className="form-label fw-semibold text-primary">
+                                        <i className="bi bi-upload me-2"></i>Chọn tệp đầu vào
+                                    </label>
+                                    <input
+                                        type="file"
+                                        className="form-control mb-3"
+                                        accept="image/*,video/*"
+                                        onChange={handleFileChange}
+                                    />
+                                    {file && (
+                                        <p className="text-muted small mb-0">
+                                            <i className="bi bi-file-earmark-check me-1 text-success"></i>
+                                            Đã chọn: <b>{file.name}</b>
+                                        </p>
+                                    )}
+                                </div>
+
+                                <button
+                                    className="btn btn-primary mt-3 rounded shadow-sm"
+                                    onClick={handleUpload}
+                                    disabled={loading}
+                                >
+                                    {loading ? (
+                                        <>
+                                            <span className="spinner-border spinner-border-sm me-2"></span>
+                                            Đang xử lý...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <i className="bi bi-cpu me-2"></i>Tracking
+                                        </>
+                                    )}
+                                </button>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Cột kết quả */}
+                    {/* Result Column */}
                     <div className="col-12 col-lg-7">
-                        <div className="h-100 p-4 border rounded bg-white text-center d-flex flex-column justify-content-center">
-                            <p className="fs-5 fw-semibold mb-3">Kết quả</p>
-                            {!resultUrl ? (
-                                <p className="text-muted">
-                                    Chưa có kết quả, hãy chọn tệp và bấm <i>Tracking</i>
-                                </p>
-                            ) : file?.type.startsWith("image/") ? (
-                                <img
-                                    src={resultUrl}
-                                    alt="result"
-                                    className="img-fluid rounded border shadow-sm"
-                                />
-                            ) : (
-                                <video
-                                    src={resultUrl}
-                                    controls
-                                    className="w-100 rounded border shadow-sm"
-                                />
-                            )}
+                        <div className="card shadow border-0 h-100 rounded-4">
+                            <div className="card-body text-center d-flex flex-column justify-content-center align-items-center p-4">
+                                <h5 className="fw-bold text-primary mb-3">🎯 Kết quả xử lý</h5>
+
+                                {!resultUrl ? (
+                                    <div className="text-muted py-5">
+                                        <i className="bi bi-image-alt fs-1 d-block mb-3 text-secondary"></i>
+                                        <p className="fs-6">Chưa có kết quả — vui lòng chọn tệp và nhấn <b>Tracking</b>.</p>
+                                    </div>
+                                ) : file?.type.startsWith("image/") ? (
+                                    <img
+                                        src={resultUrl}
+                                        alt="result"
+                                        className="img-fluid rounded-4 border-2 border-primary shadow-sm"
+                                    />
+                                ) : (
+                                    <video
+                                        src={resultUrl}
+                                        controls
+                                        className="w-100 rounded-4 border-2 border-primary shadow-sm"
+                                    />
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>

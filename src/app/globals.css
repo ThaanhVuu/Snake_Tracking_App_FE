@@ -49,7 +49,3 @@ html {
     height: 100vh;
     scroll-margin-top: 8vh;
 }
-
-#tracking {
-    scroll-margin-top: 8vh; /* chừa chỗ cho header */
-}
