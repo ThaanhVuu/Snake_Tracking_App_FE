@@ -56,7 +56,7 @@ export function HomePage(): JSX.Element {
 
 
                 <p className="text-white italic mt-2">
-                    Dự án phát triển bởi nhóm 6 – Ứng dụng công nghệ thị giác máy tính (Computer Vision) và học sâu (Deep
+                    Dự án phát triển bởi nhóm 9 – Ứng dụng công nghệ thị giác máy tính (Computer Vision) và học sâu (Deep
                     Learning).<br/>
                     Hiện server đang sử dụng {info} để vận hành
                 </p>
