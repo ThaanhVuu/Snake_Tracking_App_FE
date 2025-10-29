@@ -27,7 +27,7 @@ export function Header() : JSX.Element {
                 <a className="nav-link fw-semibold" href="#library">Library</a>
             </li>
             <li className="nav-item">
-                <a className="nav-link fw-semibold" href={'#footer'}>About us</a>
+                <a className="nav-link fw-semibold" href={'#aboutus'}>About us</a>
             </li>
         </ul>
     );

@@ -39,10 +39,18 @@ export function Tracking(): JSX.Element {
         try {
             setLoading(true);
             const res = await callApi(file);
-            const blob = new Blob([res.data], {type: res.headers["content-type"]});
+
+            const contentType =
+                res.headers["content-type"]?.includes("video") ? "video/mp4" :
+                    res.headers["content-type"]?.includes("image") ? "image/png" :
+                        "video/mp4"; // fallback
+
+            const blob = new Blob([res.data], {type: contentType});
             if (resultUrl) URL.revokeObjectURL(resultUrl);
+
             const newUrl = URL.createObjectURL(blob);
-            setResultUrl(newUrl);
+            console.log("Video blob URL:", newUrl, "size:", blob.size);
+            setResultUrl(`${newUrl}#t=0.1`);
         } catch (err) {
             console.error(err);
             alert("Lỗi khi gửi file đến API!");
@@ -115,13 +123,15 @@ export function Tracking(): JSX.Element {
                     {/* Result Column */}
                     <div className="col-12 col-lg-7">
                         <div className="card shadow border-0 h-100 rounded-4">
-                            <div className="card-body text-center d-flex flex-column justify-content-center align-items-center p-4">
+                            <div
+                                className="card-body text-center d-flex flex-column justify-content-center align-items-center p-4">
                                 <h5 className="fw-bold text-primary mb-3">🎯 Kết quả xử lý</h5>
 
                                 {!resultUrl ? (
                                     <div className="text-muted py-5">
                                         <i className="bi bi-image-alt fs-1 d-block mb-3 text-secondary"></i>
-                                        <p className="fs-6">Chưa có kết quả — vui lòng chọn tệp và nhấn <b>Tracking</b>.</p>
+                                        <p className="fs-6">Chưa có kết quả — vui lòng chọn tệp và nhấn <b>Tracking</b>.
+                                        </p>
                                     </div>
                                 ) : file?.type.startsWith("image/") ? (
                                     <img
@@ -131,8 +141,10 @@ export function Tracking(): JSX.Element {
                                     />
                                 ) : (
                                     <video
+                                        key={resultUrl} // ép React re-render
                                         src={resultUrl}
                                         controls
+                                        autoPlay
                                         className="w-100 rounded-4 border-2 border-primary shadow-sm"
                                     />
                                 )}
